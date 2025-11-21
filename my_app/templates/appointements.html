@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>قائمة المواعيد</title>
+    <link rel="stylesheet" href="{% static 'css/appointments.css' %}">
+    <style>
+        :root {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --accent: #2563eb;    /* أزرق لطيف */
+  --muted: #6b7280;
+  --success: #16a34a;
+  --border: #e6e9ef;
+  --radius: 12px;
+  --gap: 16px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  font-family: "Noto Sans Arabic", "Segoe UI", Roboto, system-ui, sans-serif;
+  color: #0f172a;
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ===== العنوان والرسالة ===== */
+.header-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  border: 1px solid var(--border);
+  margin-bottom: var(--gap);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.message {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(22, 163, 74, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(22, 163, 74, 0.18);
+  font-weight: 600;
+}
+
+/* ===== الجدول ===== */
+.table-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+  border: 1px solid var(--border);
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.appointments-table th,
+.appointments-table td {
+  text-align: right;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f3f7;
+  vertical-align: middle;
+  font-size: 15px;
+}
+
+.appointments-table thead th {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0b1220;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.02));
+  position: sticky;
+  top: 0;
+}
+
+.appointments-table tbody tr:nth-child(even) {
+  background: #fbfcfe;
+}
+
+.appointments-table tbody tr:hover {
+  background: #f2f6ff;
+  transform: translateY(-1px);
+  transition: background 0.2s, transform 0.1s;
+}
+
+.empty-row td {
+  text-align: center;
+  color: var(--muted);
+  padding: 20px;
+}
+
+/* ===== الحالات (Badges) ===== */
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  text-transform: capitalize;
+}
+
+.badge.booked {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.14);
+}
+
+.badge.done {
+  background: #ecfdf5;
+  color: #166534;
+  border-color: rgba(16, 185, 129, 0.12);
+}
+
+.badge.cancel {
+  background: #fff1f2;
+  color: #9f1239;
+  border-color: rgba(239, 68, 68, 0.10);
+}
+
+/* ===== هواتف ===== */
+@media (max-width: 720px) {
+  .header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .appointments-table {
+    min-width: 640px;
+  }
+  html, body {
+    font-size: 15px;
+  }
+}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header-card">
+        <h2>قائمة المرضى الذين حجزوا مواعيد عندك:</h2>
+        {% if message %}
+            <div class="message">{{ message }}</div>
+        {% endif %}
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="appointments-table">
+                <thead>
+                    <tr>
+                        <th>اسم المريض</th>
+                        <th>التاريخ</th>
+                        <th>الوقت</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td>{{ appt.patient.first_name }} {{ appt.patient.last_name }}</td>
+                        <td>{{ appt.date }}</td>
+                        <td>{{ appt.time }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if appt.status == 'booked' %}booked
+                                {% elif appt.status == 'done' %}done
+                                {% else %}cancel{% endif %}">
+                                {{ appt.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="4">لا يوجد مواعيد حالياً.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

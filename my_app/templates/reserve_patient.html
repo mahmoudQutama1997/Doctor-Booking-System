@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reserve Appointment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #aaa;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e2e3e5;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        li {
+            padding: 5px 0;
+        }
+.message-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background-color: #f8d7da; /* أحمر للمشكلة */
+  color: #721c24;
+  border: 2px solid #f5c6cb;
+  border-radius: 12px;
+  padding: 25px 35px;
+  font-weight: 600;
+  font-size: 1.2rem;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  opacity: 0;
+  animation: showMessage 0.5s forwards, hideMessage 0.5s 3s forwards;
+  z-index: 9999;
+}
+
+/* Animations */
+@keyframes showMessage {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes hideMessage {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+}
+    </style>
+</head>
+<body>
+
+    <h1>Patients who booked with Dr. {{ doctor.first_name }} {{ doctor.last_name }}</h1>
+
+   {% if message %}
+  <div class="message-box">
+     {{ message }} <br>
+   
+  </div>
+{% endif %}
+
+    <h2>List of Patients</h2>
+    <ul>
+        {% for patient in patients %}
+            <li>
+                {{ patient.first_name }} {{ patient.last_name }} - {{ patient.phone }}
+            </li>
+        {% empty %}
+            <li>No patients have booked yet.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Appointments Details</h2>
+    <table>
+        <tr>
+            <th>Patient</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+        </tr>
+        {% for a in appointments %}
+        <tr>
+            <td>{{ a.patient.first_name }} {{ a.patient.last_name }}</td>
+            <td>{{ a.date }}</td>
+            <td>{{ a.time }}</td>
+            <td>{{ a.status }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No appointments found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>

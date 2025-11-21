@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Book Appointment</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand-1: #0078d7;
+      --brand-2: #00a2ff;
+    }
+
+    body{
+      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #f6f9ff 0%, #eef3f9 100%);
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    .site-header{
+      background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(8,30,60,0.08);
+    }
+
+    .doctor-photo {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: .5rem;
+    }
+
+    .slot-btn {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .message-fade {
+      animation: fadeOut 0.4s ease forwards;
+      animation-delay: 4.5s;
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateY(-8px); }
+    }
+
+    @media (max-width: 576px){
+      .doctor-photo { height: 160px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- MESSAGES -->
+{% if messages %}
+  <div class="container mt-4">
+    {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} shadow-sm message-fade">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- HEADER / NAV -->
+<header class="site-header py-3">
+  <div class="container d-flex align-items-center justify-content-between">
+    <div>
+      <h1 class="h4 mb-0">مرحباً، {{ patient.first_name }} {{ patient.last_name }}</h1>
+      <small class="text-white-50">احجز موعدك بسرعة وسهولة</small>
+    </div>
+    <div>
+      <a href="{% url 'logout' %}" class="btn btn-light btn-sm fw-bold">تسجيل خروج</a>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="container py-5">
+  <h2 class="text-center text-primary mb-4">الأطباء المتاحين</h2>
+
+  {% if doctors %}
+    <div class="row g-4">
+      {% for doctor in doctors %}
+        <div class="col-sm-6 col-lg-4">
+          <div class="card h-100 shadow-sm">
+
+            <!-- Doctor Photo -->
+            {% if doctor.photo %}
+              <img src="{{ doctor.photo.url }}" alt="Doctor Photo" class="doctor-photo card-img-top">
+            {% else %}
+              <svg class="bd-placeholder-img card-img-top" width="100%" height="200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder">
+                <rect width="100%" height="100%" fill="#e9f4ff"></rect>
+              </svg>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h5 class="card-title mb-0">د. {{ doctor.first_name }} {{ doctor.last_name }}</h5>
+                  <div class="text-muted small">{{ doctor.speciality }}</div>
+                </div>
+                <div>
+                  <span class="badge bg-primary">متخصص</span>
+                </div>
+              </div>
+
+              <!-- Like Button & Counter -->
+              <div class="d-flex align-items-center mb-2">
+                <form action="{% url 'like_toggle' doctor.id %}" method="post" class="me-2">
+                  {% csrf_token %}
+                  {% if doctor.id in liked_doctors %}
+                    <button class="btn btn-sm btn-danger rounded-pill px-3">
+                      ❤️ إلغاء
+                    </button>
+                  {% else %}
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                      🤍 إعجاب
+                    </button>
+                  {% endif %}
+                </form>
+                <span class="badge bg-danger">
+                  ❤️ {{ doctor.likes.count }}
+                </span>
+              </div>
+
+              <hr>
+
+              <!-- Available Slots -->
+              <div class="mb-2">
+                <h6 class="mb-2 small text-secondary">المواعيد المتاحة</h6>
+                <div class="d-grid gap-2">
+                  {% for slot in doctor.availability.all %}
+                    {% if slot.date >= today %}
+                      {% if slot.is_booked %}
+                        <div class="badge bg-danger text-white py-2">
+                          {{ slot.date }} — {{ slot.start_time }} (محجوز)
+                        </div>
+                      {% else %}
+                        <form method="post" action="{% url 'reserve_patient' doctor.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="date" value="{{ slot.date|date:'Y-m-d' }}">
+                          <input type="hidden" name="time" value="{{ slot.start_time|time:'H:i' }}">
+                          <button type="submit" class="btn btn-outline-primary slot-btn text-start">
+                            <div class="d-flex justify-content-between">
+                              <span>{{ slot.date }} — {{ slot.start_time }}</span>
+                              <small class="text-primary">حجز</small>
+                            </div>
+                          </button>
+                        </form>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="mt-auto pt-3 border-top">
+                <small class="text-muted">تفاصيل إضافية أو مكان العيادة</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <p class="text-muted fs-5">لا يوجد أطباء متاحين حالياً.</p>
+    </div>
+  {% endif %}
+</main>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

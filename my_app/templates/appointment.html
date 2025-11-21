@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Confirm Appointment</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 600px;
+    margin: 60px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 25px;
+}
+h1 {
+    text-align: center;
+    color: #0078d7;
+    margin-bottom: 20px;
+}
+.details {
+    background: #f9fbff;
+    border: 2px solid #0078d7;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.details p {
+    margin: 8px 0;
+    color: #333;
+}
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: none;
+    height: 80px;
+}
+button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    display: block;
+    margin: 0 auto;
+}
+button:hover {
+    background-color: #1e7e34;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Confirm Appointment</h1>
+
+    <div class="details">
+        <p><strong>Doctor:</strong> Dr. {{ doctor.first_name }} {{ doctor.last_name }}</p>
+         
+        <p><strong>Date:</strong> {{ available.date }}</p>
+        <p><strong>Time:</strong> {{ available.start_time }}</p>
+    
+        <p><strong>Patient:</strong> {{ patient.first_name }} {{ patient.last_name }}</p>
+    </div>
+
+    <form method="post" action="{% url 'cfm_appointment'  doctor.id %}">
+        {% csrf_token %}
+          {% for slot in availability%} 
+    <input type="hidden" name="date" value="{{ slot.date }}">
+    <input type="hidden" name="time" value="{{ slot.start_time|time:'H:i' }}">
+
+     {%endfor%}
+        <label for="reason"><strong>Reason for appointment (optional):</strong></label>
+        <textarea name="reason" id="reason" placeholder="Describe your reason..."></textarea>
+        <br><br>
+        <button type="submit">Confirm Appointment</button>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f9fafb;
+    }
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .btn-yellow {
+      background-color: #facc15;
+      color: white;
+      transition: 0.3s;
+    }
+    .btn-yellow:hover {
+      background-color: #eab308;
+      color: white;
+    }
+    .side-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+    @media (max-width: 992px) {
+      .side-img {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-5">
+    <div class="row align-items-center">
+
+      <!-- Left side info + image -->
+  <div class="col-lg-4 text-center">
+    {% if doctor.photo %}
+        <img src="{{ doctor.photo.url }}" alt="Dr. {{ doctor.first_name }} {{ doctor.last_name }}" class="side-img mb-3" style="border-radius: 12px; width: 100%; max-width: 220px; height: auto; object-fit: cover;">
+    {% else %}
+        <img src="{% static 'images/default_doctor.png' %}" alt="Default doctor" class="side-img mb-3" style="border-radius: 12px; width: 100%; max-width: 220px; height: auto; object-fit: cover;">
+    {% endif %}
+    
+    <h4 class="text-warning fw-bold">👨‍⚕️ Dr. {{ doctor.first_name }} {{ doctor.last_name }}</h4>
+    <p class="text-muted">
+        {{ doctor.speciality.name }}  
+        <br>
+        <small>Experience: {{ doctor.experience_years }} years</small>
+    </p>
+
+    <ul class="list-unstyled text-muted text-start d-inline-block">
+        <li>✔️ Manage appointments online</li>
+        <li>✔️ Connect with verified patients</li>
+        <li>✔️ Showcase your medical expertise</li>
+    </ul>
+</div>
+
+      <!-- Center: registration form -->
+      <div class="col-lg-4">
+        <div class="form-container">
+          <h3 class="text-center mb-4 fw-bold text-warning">🩺 Doctor Registration</h3>
+
+         <form method="POST" action="{% url 'registration_doctor' %}" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-control" name="first_name" placeholder="Enter first name" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-control" name="last_name" placeholder="Enter last name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" placeholder="Enter password" required>
+            </div>
+
+            <div class="mb-3">
+               <label class="form-label">Confirm Password</label>
+               <input type="password" class="form-control" name="password" placeholder="Confirm password" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Phone</label>
+              <input type="text" class="form-control" name="phone" placeholder="Enter phone number" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Bio</label>
+              <textarea class="form-control" name="bio" rows="3" placeholder="Write short bio..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Clinic Name</label>
+              <input type="text" class="form-control" name="clinic_name" placeholder="Clinic name">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Address</label>
+              <input type="text" class="form-control" name="address" placeholder="Clinic address">
+            </div>
+              <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="text" class="form-control" name="email" placeholder="Enter Email" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Speciality</label>
+              <select class="form-select" name="speciality" required>
+                <option value="">Select Speciality</option>
+                {% for sp in specialities %}
+                  <option value="{{ sp.id }}">{{ sp.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Photo</label>
+              <input type="file" class="form-control" name="photo">
+            </div>
+
+            <button type="submit" class="btn btn-yellow w-100 py-2">Register Now</button>
+            
+           <p class="text-center mt-3">
+                Already have an account?
+          <a href="{% url 'login_doctor' %}" class="text-warning fw-bold text-decoration-none">
+           Login here
+            </a>
+</p>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right side content -->
+      <div class="col-lg-4 text-center">
+        <img src="{% static 'images/doctor.jpg' %}" alt="Doctor illustration" class="side-img mb-3">
+        <h4 class="text-warning fw-bold">💼 Why Join Us?</h4>
+        <p class="text-muted">Gain visibility among patients, manage schedules efficiently,  
+          and be part of a trusted medical platform.</p>
+        <a href="{% url 'registration_patient' %}" class="btn btn-outline-warning mt-2">I'm a Patient</a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
